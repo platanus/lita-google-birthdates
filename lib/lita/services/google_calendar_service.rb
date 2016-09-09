@@ -20,7 +20,8 @@ class GoogleCalendarService
     calendar.login_with_refresh_token(config.refresh_token)
     events = calendar.find_events_in_range(@date, @date + 1)
     events.map { |event| EventToBirthday.from_event(event).to_birthday }
-  rescue
+  rescue Exception => e
+    puts "Error #{e.message}"
     []
   end
 

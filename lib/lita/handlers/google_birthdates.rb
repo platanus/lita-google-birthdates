@@ -1,4 +1,6 @@
 require 'rufus-scheduler'
+require "lita/services/google_calendar_service"
+require "lita/services/event_to_birthday"
 require "lita/models/birthday"
 
 module Lita
@@ -9,13 +11,13 @@ module Lita
 
     class GoogleBirthdates < Handler
       on :loaded, :load_on_start
-      config :calendar_credentials do
+      config :calendar_credentials, required: true do
         config :refresh_token, type: String
         config :client_id, type: String
         config :client_secret, type: String
         config :calendar_id, type: String
       end
-      config :channel, type: String
+      config :room, type: String, required: true
 
       route /^birthday today$/, :check_birthdays_today, help: {
         t("help.birthday.usage") => t("help.birthday.description")
@@ -27,7 +29,7 @@ module Lita
           log.info "Checking birthdays for #{date}"
           birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
           birthdays.each do |birthday|
-            target = Source.new(room: config.channel)
+            target = Source.new(room: config.room)
             robot.send_messages(target, "Feliz cumple #{birthday.name}! :partyparrot:")
           end
         end

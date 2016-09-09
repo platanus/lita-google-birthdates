@@ -1,0 +1,7 @@
+Lita.configure do |config|
+  config.handlers.google_birthdates.calendar_credentials.client_id = ""
+  config.handlers.google_birthdates.calendar_credentials.client_secret = ""
+  config.handlers.google_birthdates.calendar_credentials.calendar_id = ""
+  config.handlers.google_birthdates.calendar_credentials.refresh_token = ""
+  config.handlers.google_birthdates.room = "coffeebar"
+ end
