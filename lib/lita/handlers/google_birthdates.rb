@@ -15,6 +15,7 @@ module Lita
         config :client_secret, type: String
         config :calendar_id, type: String
       end
+      config :channel, type: String
 
       route /^birthday today$/, :check_birthdays_today, help: {
         t("help.birthday.usage") => t("help.birthday.description")
@@ -26,7 +27,7 @@ module Lita
           log.info "Checking birthdays for #{date}"
           birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
           birthdays.each do |birthday|
-            target = Source.new(room: '#coffeebar')
+            target = Source.new(room: config.channel)
             robot.send_messages(target, "Feliz cumple #{birthday.name}! :partyparrot:")
           end
         end
