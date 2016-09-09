@@ -39,8 +39,12 @@ module Lita
         date = Time.now
         log.info "Checking birthdays for #{date}"
         birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
-        birthdays.each do |birthday|
-          response.reply("Hoy #{birthday.name} cumple años! :partyparrot:")
+        if birthdays.empty?
+          response.reply("Hoy no tenemos cumpleaños :robot-face:")
+        else
+          birthdays.each do |birthday|
+            response.reply("Hoy #{birthday.name} cumple años! :partyparrot:")
+          end
         end
       end
 
