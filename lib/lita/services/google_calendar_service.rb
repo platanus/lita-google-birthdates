@@ -1,10 +1,11 @@
 class GoogleCalendarService
-  def self.fetch(date: query_date)
-    new(date).fetch
+  def self.fetch(date:, config:)
+    new(date, config).fetch
   end
 
-  def initialize(date)
+  def initialize(date, config)
     @date = date
+    @config = config
   end
 
   def fetch
@@ -13,8 +14,10 @@ class GoogleCalendarService
 
   private
 
+  attr_reader :config
+
   def events_from_date
-    calendar.login_with_refresh_token(ENV['GOOGLE_CALENDAR_REFRESH_TOKEN'])
+    calendar.login_with_refresh_token(config.refresh_token)
     events = calendar.find_events_in_range(@date, @date + 1)
     events.map { |event| EventToBirthday.from_event(event).to_birthday }
   rescue
@@ -23,9 +26,9 @@ class GoogleCalendarService
 
   def calendar
     @calendar ||= Google::Calendar.new(
-      client_id: ENV['GOOGLE_CLIENT_ID'],
-      client_secret: ENV['GOOGLE_CLIENT_SECRET'],
-      calendar: ENV['GOOGLE_CALENDAR_ID'],
+      client_id: config.client_id,
+      client_secret: config.client_secret,
+      calendar: config.calendar_id,
       redirect_url: "urn:ietf:wg:oauth:2.0:oob" # this is what Google uses for 'applications'
     )
   end
