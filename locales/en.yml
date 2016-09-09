@@ -2,3 +2,7 @@ en:
   lita:
     handlers:
       google_birthdates:
+        help:
+          birthday:
+            usage: birthday today
+            description: Checks for birthdays today

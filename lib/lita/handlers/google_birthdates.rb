@@ -16,6 +16,10 @@ module Lita
         config :calendar_id, type: String
       end
 
+      route /^birthday today$/, :check_birthdays_today, help: {
+        t("help.birthday.usage") => t("help.birthday.description")
+      }
+
       def load_on_start(_payload)
         Lita::Handlers.scheduler.cron '0 11 * * *' do
           date = Time.now
@@ -25,6 +29,15 @@ module Lita
             target = Source.new(room: '#coffeebar')
             robot.send_messages(target, "Feliz cumple #{birthday.name}! :partyparrot:")
           end
+        end
+      end
+
+      def check_birthdays_today(response)
+        date = Time.now
+        log.info "Checking birthdays for #{date}"
+        birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
+        birthdays.each do |birthday|
+          response.reply("Hoy #{birthday.name} cumple años! :partyparrot:")
         end
       end
 
