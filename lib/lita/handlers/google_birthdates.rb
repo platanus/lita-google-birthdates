@@ -1,6 +1,7 @@
 require 'rufus-scheduler'
 require "lita/services/google_calendar_service"
 require "lita/services/event_to_birthday"
+require "lita/services/greetings_service"
 require "lita/models/birthday"
 
 module Lita
@@ -18,34 +19,20 @@ module Lita
         config :calendar_id, type: String
       end
       config :room, type: String, required: true
+      config :timezone, type: String, default: "America/Santiago"
 
       route /^birthday today$/, :check_birthdays_today, help: {
         t("help.birthday.usage") => t("help.birthday.description")
       }
 
       def load_on_start(_payload)
-        Lita::Handlers.scheduler.cron '0 11 * * *' do
-          date = Time.now
-          log.info "Checking birthdays for #{date}"
-          birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
-          birthdays.each do |birthday|
-            target = Source.new(room: config.room)
-            robot.send_messages(target, "Feliz cumple #{birthday.name}! :partyparrot:")
-          end
+        Lita::Handlers.scheduler.cron "0 9 * * * #{config.timezone}" do
+          GreetingsService.new(self, response: response).greet
         end
       end
 
       def check_birthdays_today(response)
-        date = Time.now
-        log.info "Checking birthdays for #{date}"
-        birthdays = GoogleCalendarService.fetch date: date, config: config.calendar_credentials
-        if birthdays.empty?
-          response.reply("Hoy no tenemos cumpleaños :robot-face:")
-        else
-          birthdays.each do |birthday|
-            response.reply("Hoy #{birthday.name} cumple años! :partyparrot:")
-          end
-        end
+        GreetingsService.new(self, response: response, show_soon: true).greet
       end
 
       Lita.register_handler(self)

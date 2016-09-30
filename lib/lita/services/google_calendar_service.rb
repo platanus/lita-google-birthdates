@@ -1,24 +1,31 @@
 class GoogleCalendarService
-  def self.fetch(date:, config:)
-    new(date, config).fetch
+  def self.fetch(config:, date: nil, range: nil)
+    new(date, config, range).fetch
   end
 
-  def initialize(date, config)
+  def initialize(date, config, range)
     @date = date
+    @range = range
     @config = config
   end
 
+  attr_reader :range, :date
+
   def fetch
-    events_from_date
+    if range
+      events_from_range(range.first, range.last)
+    else
+      events_from_range(date, date + 1)
+    end
   end
 
   private
 
   attr_reader :config
 
-  def events_from_date
+  def events_from_range(from, to)
     calendar.login_with_refresh_token(config.refresh_token)
-    events = calendar.find_events_in_range(@date, @date + 1)
+    events = calendar.find_events_in_range(from, to)
     events.map { |event| EventToBirthday.from_event(event).to_birthday }
   rescue Exception => e
     puts "Error #{e.message}"

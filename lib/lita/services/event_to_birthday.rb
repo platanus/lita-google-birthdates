@@ -15,6 +15,7 @@ class EventToBirthday
     birthday.full_name = full_name
     birthday.date = date
     birthday.email = email
+    birthday.has_contact_info = has_contact_info
     birthday
   end
 
@@ -33,7 +34,11 @@ class EventToBirthday
   end
 
   def name
-    prefs["goo.contactsGivenName"]
+    prefs["goo.contactsGivenName"] || event.title
+  end
+
+  def has_contact_info
+    !prefs.empty?
   end
 
   def prefs
